@@ -78,7 +78,7 @@ async def generate_report_plan(state: ReportState, config: RunnableConfig):
     else:
         writer_provider = get_config_value(configurable.writer_provider)
         writer_model_name = get_config_value(configurable.writer_model)
-        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider) 
+        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider, base_url="https://generativelanguage.googleapis.com/v1beta/openai/") 
     structured_llm = writer_model.with_structured_output(Queries)
 
     # Format system instructions
@@ -120,7 +120,7 @@ async def generate_report_plan(state: ReportState, config: RunnableConfig):
     else:
 
         # With other models, we can use with_structured_output
-        planner_llm = init_chat_model(model=planner_model, model_provider=planner_provider)
+        planner_llm = init_chat_model(model=planner_model, model_provider=planner_provider, base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
     
     # Generate the report sections
     structured_llm = planner_llm.with_structured_output(Sections)
@@ -212,7 +212,7 @@ def generate_queries(state: SectionState, config: RunnableConfig):
     else:
         writer_provider = get_config_value(configurable.writer_provider)
         writer_model_name = get_config_value(configurable.writer_model)
-        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider) 
+        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider, base_url="https://generativelanguage.googleapis.com/v1beta/openai/") 
     structured_llm = writer_model.with_structured_output(Queries)
 
     # Format system instructions
@@ -298,7 +298,7 @@ def write_section(state: SectionState, config: RunnableConfig) -> Command[Litera
     else:
         writer_provider = get_config_value(configurable.writer_provider)
         writer_model_name = get_config_value(configurable.writer_model)
-        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider) 
+        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider, base_url="https://generativelanguage.googleapis.com/v1beta/openai/") 
 
     section_content = writer_model.invoke([SystemMessage(content=section_writer_instructions),
                                            HumanMessage(content=section_writer_inputs_formatted)])
@@ -330,7 +330,8 @@ def write_section(state: SectionState, config: RunnableConfig) -> Command[Litera
                                            thinking={"type": "enabled", "budget_tokens": 16_000}).with_structured_output(Feedback)
     else:
         reflection_model = init_chat_model(model=planner_model, 
-                                           model_provider=planner_provider).with_structured_output(Feedback)
+                                           model_provider=planner_provider,
+                                           base_url="https://generativelanguage.googleapis.com/v1beta/openai/").with_structured_output(Feedback)
     # Generate feedback
     feedback = reflection_model.invoke([SystemMessage(content=section_grader_instructions_formatted),
                                         HumanMessage(content=section_grader_message)])
@@ -380,7 +381,7 @@ def write_final_sections(state: SectionState, config: RunnableConfig):
     else:
         writer_provider = get_config_value(configurable.writer_provider)
         writer_model_name = get_config_value(configurable.writer_model)
-        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider) 
+        writer_model = init_chat_model(model=writer_model_name, model_provider=writer_provider, base_url="https://generativelanguage.googleapis.com/v1beta/openai/") 
     
     section_content = writer_model.invoke([SystemMessage(content=system_instructions),
                                            HumanMessage(content="Generate a report section based on the provided sources.")])
